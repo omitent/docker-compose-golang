@@ -1,0 +1,38 @@
+
+version: "3.6"
+services:
+  goservice:
+    build: "."
+    ports:
+      - "8080"
+    depends_on:
+      - "db"
+    networks:
+      - microservice
+  nginx:
+    build: "./nginx"
+    ports:
+      - "81:80"
+    depends_on:
+      - "goservice"
+    networks:
+      - microservice
+  db:
+    image: mariadb
+    container_name: db
+    restart: always
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "3307:3306"
+    env_file:
+      - .env
+    volumes:
+      - ./mariadb_data:/var/lib/mysql/
+      - ./db_conf/my.cnf:/etc/mysql/my.cnf
+      - ./db_conf/mariadb.cnf:/etc/mysql/mariadb.cnf
+    networks:
+      - microservice
+#Networks
+networks:
+  microservice:
+    driver: bridge
